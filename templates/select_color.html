@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Selecionar Cor</title>
+    <style>
+        body {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        #image-and-preview {
+            flex: 1;
+            max-width: 400px; /* Largura fixa para a imagem e pré-visualização */
+        }
+        #image-container {
+            position: relative;
+        }
+        #target-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+        #preview-container {
+            margin-top: 20px;
+            border: 2px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        #preview-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 4px;
+        }
+        .controls-container {
+            flex: 1;
+            max-width: 400px;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .texture-select, .opacity-control, .brush-controls, .tolerance-control {
+            margin-bottom: 20px;
+        }
+        .texture-select label, .opacity-control label, .brush-controls label, .tolerance-control label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .texture-select select, .opacity-control input, .brush-controls input, .tolerance-control input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .controls button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+        .info {
+            color: #666;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .click-marker {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+        }
+        .brush-cursor {
+            position: absolute;
+            border: 2px solid red;
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+        }
+        #paint-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        .draggable {
+            position: absolute;
+            border: 2px dashed #007bff;
+            background-color: rgba(0, 123, 255, 0.2);
+            cursor: move;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/1.10.11/interact.min.js"></script>
+</head>
+<body>
+    <h1>Substituição de Texturas</h1>
+    <div class="container">
+        <!-- Contêiner da imagem e pré-visualização -->
+        <div id="image-and-preview">
+            <!-- Contêiner da imagem original -->
+            <div id="image-container">
+                <img id="target-image" src="{{ original_url }}">
+                <canvas id="paint-canvas"></canvas>
+                <div id="brush-cursor" class="brush-cursor"></div>
+            </div>
+
+            <!-- Contêiner da pré-visualização -->
+            <div id="preview-container">
+                <h2>Pré-visualização</h2>
+                <img id="preview-image" src="" alt="Pré-visualização">
+            </div>
+        </div>
+
+        <!-- Contêiner dos controles -->
+        <div class="controls-container">
+            <div class="texture-select">
+                <label>Selecione uma textura:</label>
+                <select id="texture-select">
+                    {% for texture in textures %}
+                        <option value="{{ texture }}">{{ texture }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="opacity-control">
+                <label for="opacity-slider">Opacidade da textura:</label>
+                <input type="range" id="opacity-slider" min="0" max="1" step="0.1" value="1">
+                <span id="opacity-value">1</span>
+            </div>
+
+            <div class="tolerance-control">
+                <label for="tolerance-slider">Tolerância de cor:</label>
+                <input type="range" id="tolerance-slider" min="0" max="100" step="1" value="30">
+                <span id="tolerance-value">30</span>
+            </div>
+
+            <div class="brush-controls">
+                <label for="brush-size">Tamanho do Pincel:</label>
+                <input type="range" id="brush-size" min="1" max="50" step="1" value="10">
+                <span id="brush-size-value">10</span>
+                <button onclick="setMode('click')">Modo Seleção de Cor</button>
+                <button onclick="setMode('brush')">Modo Pincel</button>
+            </div>
+
+            <div class="info">
+                Use o <strong>Modo Seleção de Cor</strong> para clicar em áreas específicas ou o <strong>Modo Pincel</strong> para pintar a área onde deseja aplicar a textura.
+            </div>
+
+            <div class="controls">
+                <button onclick="applyTexture()">Aplicar Textura</button>
+                <button onclick="clearSelections()">Limpar Seleções</button>
+            </div>
+
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let clickPoints = [];
+        let markers = [];
+        let currentMode = 'click'; // 'click' ou 'brush'
+        let brushSize = 10;
+        let isDrawing = false;
+
+        // Elementos do DOM
+        const brushCursor = document.getElementById('brush-cursor');
+        const imageContainer = document.getElementById('image-container');
+        const targetImage = document.getElementById('target-image');
+        const paintCanvas = document.getElementById('paint-canvas');
+        const ctx = paintCanvas.getContext('2d');
+
+        // Configurar canvas para pintura
+        function setupCanvas() {
+            const rect = targetImage.getBoundingClientRect();
+            paintCanvas.width = rect.width;
+            paintCanvas.height = rect.height;
+            paintCanvas.style.width = `${rect.width}px`;
+            paintCanvas.style.height = `${rect.height}px`;
+        }
+
+        // Atualizar pré-visualização em tempo real
+        socket.on('preview_updated', function(data) {
+            document.getElementById('preview-image').src = data.preview_url + '?t=' + new Date().getTime();
+        });
+
+        // Função para definir o modo (click ou brush)
+        function setMode(mode) {
+            currentMode = mode;
+            if (mode === 'brush') {
+                brushCursor.style.display = 'block';
+                targetImage.style.cursor = 'none';
+                paintCanvas.style.pointerEvents = 'auto';
+            } else {
+                brushCursor.style.display = 'none';
+                targetImage.style.cursor = 'crosshair';
+                paintCanvas.style.pointerEvents = 'none';
+            }
+            alert(`Modo alterado para: ${mode === 'click' ? 'Seleção de Cor' : 'Pincel'}`);
+        }
+
+        // Função para atualizar o cursor do pincel
+        function updateBrushCursor(e) {
+            if (currentMode === 'brush') {
+                const rect = targetImage.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                brushCursor.style.left = `${x}px`;
+                brushCursor.style.top = `${y}px`;
+                brushCursor.style.width = `${brushSize * 2}px`;
+                brushCursor.style.height = `${brushSize * 2}px`;
+            }
+        }
+
+        // Função para pintar no canvas
+        function paint(e) {
+            if (currentMode !== 'brush' || !isDrawing) return;
+
+            const rect = targetImage.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.beginPath();
+            ctx.arc(x, y, brushSize, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+            ctx.fill();
+        }
+
+        // Função para enviar a máscara pintada ao servidor
+        function sendPaintMask() {
+            const uploadId = '{{ upload_id }}';
+            const imageData = ctx.getImageData(0, 0, paintCanvas.width, paintCanvas.height);
+
+            // Converter ImageData para uma matriz de pixels
+            const pixels = [];
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                if (imageData.data[i + 3] > 0) { // Verificar se o pixel foi pintado
+                    const x = (i / 4) % paintCanvas.width;
+                    const y = Math.floor((i / 4) / paintCanvas.width);
+                    pixels.push([x, y]);
+                }
+            }
+
+            // Enviar pontos pintados para o servidor
+            socket.emit('update_preview', {
+                upload_id: uploadId,
+                click_points: pixels,
+                tolerance: 0 // Não usar tolerância no modo pincel
+            });
+        }
+
+        // Função para lidar com cliques (modo seleção de cor)
+        function handleClick(e) {
+            if (currentMode !== 'click') return;
+
+            const rect = targetImage.getBoundingClientRect();
+            const scaleX = targetImage.naturalWidth / rect.width;
+            const scaleY = targetImage.naturalHeight / rect.height;
+
+            const x = Math.round((e.clientX - rect.left) * scaleX);
+            const y = Math.round((e.clientY - rect.top) * scaleY);
+
+            // Verificar se o clique foi em uma marcação existente
+            const clickedMarkerIndex = markers.findIndex(marker => {
+                const markerRect = marker.getBoundingClientRect();
+                const markerCenterX = markerRect.left + markerRect.width / 2;
+                const markerCenterY = markerRect.top + markerRect.height / 2;
+
+                // Calcular a distância entre o clique e o centro da marcação
+                const distance = Math.sqrt((e.clientX - markerCenterX) ** 2 + (e.clientY - markerCenterY) ** 2);
+                return distance < 10; // Raio de 10px para remoção
+            });
+
+            if (clickedMarkerIndex !== -1) {
+                // Remover marcação e ponto correspondente
+                markers[clickedMarkerIndex].remove();
+                markers.splice(clickedMarkerIndex, 1);
+                clickPoints.splice(clickedMarkerIndex, 1);
+            } else {
+                // Adicionar ponto clicado à lista
+                clickPoints.push([x, y]);
+
+                // Adicionar marcador visual
+                const marker = document.createElement('div');
+                marker.className = 'click-marker';
+                marker.style.left = `${e.clientX - rect.left}px`;
+                marker.style.top = `${e.clientY - rect.top}px`;
+                imageContainer.appendChild(marker);
+                markers.push(marker);
+            }
+
+            // Atualizar pré-visualização
+            updatePreview();
+        }
+
+        // Função para atualizar a pré-visualização
+        function updatePreview() {
+            const uploadId = '{{ upload_id }}';
+            const tolerance = currentMode === 'click' ? parseInt(document.getElementById('tolerance-slider').value) : 0;
+
+            socket.emit('update_preview', {
+                upload_id: uploadId,
+                click_points: clickPoints,
+                tolerance: tolerance
+            });
+        }
+
+        // Função para limpar seleções
+        function clearSelections() {
+            markers.forEach(marker => marker.remove());
+            markers = [];
+            clickPoints = [];
+            ctx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+            updatePreview();
+        }
+
+        // Função para aplicar a textura
+        function applyTexture() {
+            const texture = document.getElementById('texture-select').value;
+            const opacity = parseFloat(document.getElementById('opacity-slider').value);
+            const uploadId = '{{ upload_id }}';
+
+            // Verificar se há áreas selecionadas
+            const imageData = ctx.getImageData(0, 0, paintCanvas.width, paintCanvas.height);
+            const hasPaintedPixels = imageData.data.some((value, index) => index % 4 === 3 && value > 0);
+
+            if (clickPoints.length === 0 && !hasPaintedPixels) {
+                alert('Selecione pelo menos uma área clicando na imagem ou pintando com o pincel.');
+                return;
+            }
+
+            document.getElementById('message').textContent = 'Processando...';
+
+            fetch('/apply_texture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    upload_id: uploadId,
+                    click_points: clickPoints,
+                    texture: texture,
+                    opacity: opacity
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = `/result?image=${encodeURIComponent(data.result_url)}`;
+                } else {
+                    document.getElementById('message').textContent = 'Erro ao processar. Tente novamente.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').textContent = 'Erro na comunicação com o servidor.';
+            });
+        }
+
+        // Atualizar valor da opacidade ao mover o controle deslizante
+        document.getElementById('opacity-slider').addEventListener('input', function() {
+            document.getElementById('opacity-value').textContent = this.value;
+        });
+
+        // Atualizar tamanho do pincel
+        document.getElementById('brush-size').addEventListener('input', function() {
+            brushSize = parseInt(this.value);
+            document.getElementById('brush-size-value').textContent = this.value;
+            brushCursor.style.width = `${brushSize * 2}px`;
+            brushCursor.style.height = `${brushSize * 2}px`;
+        });
+
+        // Eventos de mouse
+        imageContainer.addEventListener('mousedown', (e) => {
+            if (currentMode === 'brush') {
+                isDrawing = true;
+                paint(e);
+            }
+        });
+
+        imageContainer.addEventListener('mousemove', (e) => {
+            updateBrushCursor(e);
+            if (isDrawing && currentMode === 'brush') {
+                paint(e);
+            }
+        });
+
+        imageContainer.addEventListener('mouseup', () => {
+            isDrawing = false;
+            if (currentMode === 'brush') {
+                sendPaintMask();
+            }
+        });
+
+        imageContainer.addEventListener('mouseleave', () => {
+            isDrawing = false;
+        });
+
+        imageContainer.addEventListener('click', handleClick);
+
+        // Configurar canvas ao carregar a página
+        window.addEventListener('load', setupCanvas);
+
+        // Função para adicionar área manipulável
+        function addDraggableArea(x, y, width, height) {
+            const area = document.createElement('div');
+            area.className = 'draggable';
+            area.style.left = `${x}px`;
+            area.style.top = `${y}px`;
+            area.style.width = `${width}px`;
+            area.style.height = `${height}px`;
+            imageContainer.appendChild(area);
+
+            interact(area)
+                .draggable({
+                    onmove: dragMoveListener,
+                    modifiers: [
+                        interact.modifiers.restrictRect({
+                            restriction: 'parent',
+                            endOnly: true
+                        })
+                    ]
+                })
+                .resizable({
+                    edges: { left: true, right: true, bottom: true, top: true },
+                    modifiers: [
+                        interact.modifiers.restrictEdges({
+                            outer: 'parent',
+                            endOnly: true
+                        }),
+                        interact.modifiers.restrictSize({
+                            min: { width: 20, height: 20 }
+                        })
+                    ],
+                    inertia: true
+                })
+                .on('resizemove', function (event) {
+                    const { x, y } = event.target.dataset;
+
+                    event.target.style.width = `${event.rect.width}px`;
+                    event.target.style.height = `${event.rect.height}px`;
+
+                    event.target.dataset.x = x;
+                    event.target.dataset.y = y;
+                });
+
+            return area;
+        }
+
+        function dragMoveListener(event) {
+            const target = event.target;
+            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+            target.style.transform = `translate(${x}px, ${y}px)`;
+
+            target.setAttribute('data-x', x);
+            target.setAttribute('data-y', y);
+        }
+
+        window.dragMoveListener = dragMoveListener;
+
+        // Adicionar área manipulável ao clicar na imagem
+        imageContainer.addEventListener('dblclick', (e) => {
+            const rect = targetImage.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            addDraggableArea(x, y, 100, 100);
+        });
+    </script>
+</body>
+</html>
