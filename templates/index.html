@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pintor de Carros</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .upload-box {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        margin: 20px 0;
+      }
+      button {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Pintor de Carros</h1>
+    <p>Faça upload de uma imagem do seu carro para começar</p>
+
+    <form
+      action="/upload"
+      method="post"
+      enctype="multipart/form-data"
+      class="upload-box"
+    >
+      <input type="file" name="file" accept="image/*" required />
+      <button type="submit">Enviar Imagem</button>
+    </form>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Resultado</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      #result-image {
+        max-width: 100%;
+        border: 2px solid #333;
+        margin: 20px 0;
+      }
+      .actions {
+        margin: 20px 0;
+      }
+      button {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Seu Carro Personalizado</h1>
+
+    <img
+      id="result-image"
+      src="{{ result_image }}"
+      alt="Resultado da pintura"
+    />
+
+    <div class="actions">
+      <button onclick="window.location.href='/'">Voltar ao Início</button>
+      <button onclick="window.location.href='{{ result_image }}'" download>
+        Baixar Imagem
+      </button>
+    </div>
+  </body>
+</html>

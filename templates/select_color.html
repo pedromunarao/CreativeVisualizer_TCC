@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Selecionar Área</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+      #image-container {
+        position: relative;
+        display: inline-block;
+        margin: 20px 0;
+      }
+      #car-image {
+        max-width: 100%;
+        display: block;
+      }
+      #selection-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        cursor: crosshair;
+        pointer-events: auto;
+      }
+      .control-panel {
+        margin: 20px 0;
+        padding: 15px;
+        background: #f5f5f5;
+      }
+      .control-group {
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Selecione a Área para Pintura</h1>
+
+    <div id="image-container">
+      <img id="car-image" src="{{ processed_url }}" alt="Seu carro" />
+      <canvas id="selection-canvas"></canvas>
+    </div>
+
+    <div class="control-panel">
+      <div class="control-group">
+        <label>Tolerância: <span id="tolerance-value">30</span></label>
+        <input type="range" id="tolerance" min="1" max="100" value="15" />
+      </div>
+
+      <div class="control-group">
+        <label>Textura:</label>
+        <select id="texture-select">
+          {% for texture in textures %}
+          <option value="{{ texture }}">{{ texture }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Opacidade: <span id="opacity-value">0.7</span></label>
+        <input
+          type="range"
+          id="opacity"
+          min="0"
+          max="1"
+          step="0.1"
+          value="0.7"
+        />
+      </div>
+
+      <button id="apply-btn">Aplicar Textura</button>
+    </div>
+
+    <script>
+      const socket = io();
+      const img = document.getElementById("car-image");
+      const canvas = document.getElementById("selection-canvas");
+      const ctx = canvas.getContext("2d");
+      let clickPoints = [];
+
+      function setupCanvas() {
+        canvas.width = img.clientWidth;
+        canvas.height = img.clientHeight;
+        canvas.style.width = img.clientWidth + "px";
+        canvas.style.height = img.clientHeight + "px";
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawMarkers();
+      }
+
+      function drawMarkers() {
+        for (let [x, y] of clickPoints) {
+          const canvasX = (x / img.naturalWidth) * canvas.width;
+          const canvasY = (y / img.naturalHeight) * canvas.height;
+          ctx.beginPath();
+          ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
+          ctx.fillStyle = "red";
+          ctx.fill();
+        }
+      }
+
+      img.onload = () => {
+        setupCanvas();
+      };
+
+      window.addEventListener("resize", setupCanvas);
+
+      document.getElementById("tolerance").addEventListener("input", (e) => {
+        document.getElementById("tolerance-value").textContent = e.target.value;
+      });
+
+      document.getElementById("opacity").addEventListener("input", (e) => {
+        document.getElementById("opacity-value").textContent = e.target.value;
+      });
+
+      canvas.addEventListener("click", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = img.naturalWidth / img.clientWidth;
+        const scaleY = img.naturalHeight / img.clientHeight;
+        const x = Math.floor((e.clientX - rect.left) * scaleX);
+        const y = Math.floor((e.clientY - rect.top) * scaleY);
+
+        clickPoints.push([x, y]);
+
+        socket.emit("select_area", {
+          upload_id: "{{ upload_id }}",
+          points: clickPoints,
+          tolerance: parseInt(document.getElementById("tolerance").value),
+        });
+
+        drawMarkers();
+      });
+
+      socket.on("selection_done", (data) => {
+        const maskImg = new Image();
+        maskImg.src = data.mask_url + "?t=" + new Date().getTime();
+        maskImg.onload = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.globalAlpha = 0.5;
+          ctx.drawImage(maskImg, 0, 0, canvas.width, canvas.height);
+          ctx.globalAlpha = 1.0;
+          drawMarkers();
+        };
+      });
+
+      socket.on("selection_error", (data) => {
+        alert("Erro na seleção: " + data.error);
+      });
+
+      document.getElementById("apply-btn").addEventListener("click", () => {
+        socket.emit("apply_texture", {
+          upload_id: "{{ upload_id }}",
+          texture: document.getElementById("texture-select").value,
+          opacity: parseFloat(document.getElementById("opacity").value),
+        });
+      });
+
+      socket.on("texture_applied", (data) => {
+        window.location.href = `/result?image=${encodeURIComponent(
+          data.result_url
+        )}`;
+      });
+
+      socket.on("application_error", (data) => {
+        alert("Erro ao aplicar textura: " + data.error);
+      });
+    </script>
+  </body>
+</html>
