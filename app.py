@@ -20,6 +20,24 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
+def resize_image(image_path, max_size=2000):
+    """Redimensiona a imagem se for maior que max_size (em pixels) mantendo a proporção"""
+    img = Image.open(image_path)
+    width, height = img.size
+    
+    if width > max_size or height > max_size:
+        if width > height:
+            new_width = max_size
+            new_height = int(height * (max_size / width))
+        else:
+            new_height = max_size
+            new_width = int(width * (max_size / height))
+            
+        img = img.resize((new_width, new_height), Image.LANCZOS)
+        img.save(image_path)
+        return True
+    return False
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -46,16 +64,26 @@ def upload_file():
     processed_filepath = os.path.join(temp_dir, 'processed.png')
 
     file.save(filepath)
-    process_image(filepath, processed_filepath)
+    
+    # Redimensionar imagem se for muito grande
+    resize_image(filepath)
+
+    remove_bg = request.form.get('remove_bg') == 'on'
+    process_image(filepath, processed_filepath, remove_background=remove_bg)
 
     return redirect(url_for('select_color', upload_id=upload_id))
 
-def process_image(image_path, output_path, bg_color=(0, 0, 0)):
+def process_image(image_path, output_path, remove_background=True):
     original = Image.open(image_path).convert("RGBA")
-    no_bg = remove(original)
-    new_bg = Image.new("RGBA", no_bg.size, bg_color + (255,))
-    final_image = Image.alpha_composite(new_bg, no_bg)
-    final_image.convert("RGB").save(output_path, "PNG")
+
+    if remove_background:
+        no_bg = remove(original)
+        transparent_bg = Image.new("RGBA", no_bg.size, (0, 0, 0, int(255 * 0.2)))
+        final_image = Image.alpha_composite(transparent_bg, no_bg)
+    else:
+        final_image = original
+
+    final_image.save(output_path, "PNG")
 
 @app.route('/select_color/<upload_id>')
 def select_color(upload_id):
@@ -77,46 +105,66 @@ def handle_area_selection(data):
         upload_id = data['upload_id']
         points = data['points']
         tolerance = int(data['tolerance'])
+        mode = data.get('mode', 'select')
 
         img_path = os.path.join(app.config['UPLOAD_FOLDER'], upload_id, 'processed.png')
         mask_path = os.path.join(app.config['UPLOAD_FOLDER'], upload_id, 'mask.png')
 
         img = cv2.imread(img_path)
         h, w = img.shape[:2]
-        mask = np.zeros((h + 2, w + 2), np.uint8)
 
-        # Criar máscara de fundo preto
-        lower_black = np.array([0, 0, 0], dtype=np.uint8)
-        upper_black = np.array([10, 10, 10], dtype=np.uint8)
-        background_mask = cv2.inRange(img, lower_black, upper_black)
-        foreground_mask = cv2.bitwise_not(background_mask)
-
-        flood_mask = np.zeros((h, w), dtype=np.uint8)
+        if os.path.exists(mask_path):
+            mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+        else:
+            mask = np.zeros((h, w), dtype=np.uint8)
 
         for (x, y) in points:
-            seed_point = (x, y)
-            fill_color = (0, 0, 255)
-            lo_diff = (tolerance, tolerance, tolerance)
-            up_diff = (tolerance, tolerance, tolerance)
-            flags = 4 | cv2.FLOODFILL_MASK_ONLY | (255 << 8)
+            reference_color = img[y, x].astype(np.int16)
+            color_diff = np.abs(img.astype(np.int16) - reference_color)
+            color_distance = np.sum(color_diff, axis=2)
+            selected_area = (color_distance <= tolerance * 3).astype(np.uint8) * 255
 
-            img_copy = img.copy()
-            cv2.floodFill(img_copy, mask, seedPoint=seed_point, newVal=fill_color,
-                          loDiff=lo_diff, upDiff=up_diff, flags=flags)
+            if mode == 'select':
+                mask = cv2.bitwise_or(mask, selected_area)
+            elif mode == 'remove':
+                mask = cv2.bitwise_and(mask, cv2.bitwise_not(selected_area))
 
-            mask_area = mask[1:h + 1, 1:w + 1]
-
-            # Ignorar fundo preto removido
-            mask_area = cv2.bitwise_and(mask_area, foreground_mask)
-
-            flood_mask = cv2.bitwise_or(flood_mask, mask_area)
-
-        cv2.imwrite(mask_path, flood_mask)
+        cv2.imwrite(mask_path, mask)
         emit('selection_done', {'status': 'success', 'mask_url': f'/uploads/{upload_id}/mask.png'})
 
     except Exception as e:
         emit('selection_error', {'error': str(e)})
 
+@socketio.on('brush_area')
+def handle_brush_area(data):
+    try:
+        upload_id = data['upload_id']
+        points = data['points']
+        radius = int(data['radius'])
+        mode = data.get('mode', 'brush')
+
+        img_path = os.path.join(app.config['UPLOAD_FOLDER'], upload_id, 'processed.png')
+        mask_path = os.path.join(app.config['UPLOAD_FOLDER'], upload_id, 'mask.png')
+
+        img = cv2.imread(img_path)
+        h, w = img.shape[:2]
+
+        if os.path.exists(mask_path):
+            mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+        else:
+            mask = np.zeros((h, w), dtype=np.uint8)
+
+        for (x, y) in points:
+            if mode == 'brush':
+                cv2.circle(mask, (x, y), radius, 255, -1)
+            elif mode == 'remove':
+                cv2.circle(mask, (x, y), radius, 0, -1)
+
+        cv2.imwrite(mask_path, mask)
+        emit('selection_done', {'status': 'success', 'mask_url': f'/uploads/{upload_id}/mask.png'})
+
+    except Exception as e:
+        emit('selection_error', {'error': str(e)})
 
 @socketio.on('apply_texture')
 def handle_texture_application(data):
@@ -129,21 +177,24 @@ def handle_texture_application(data):
         mask_path = os.path.join(app.config['UPLOAD_FOLDER'], upload_id, 'mask.png')
         texture_path = os.path.join(app.config['TEXTURE_FOLDER'], texture_name)
 
+        # Redimensionar textura se necessário
+        resize_image(texture_path, 4000)
+
         img = cv2.imread(img_path)
         mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
         texture = cv2.imread(texture_path)
 
         texture = cv2.resize(texture, (img.shape[1], img.shape[0]))
-        mask_float = mask.astype(float) / 255
 
-        result = cv2.addWeighted(img, 1 - opacity, texture, opacity, 0)
-
-        for c in range(3):
-            img[:, :, c] = img[:, :, c] * (1 - mask_float) + result[:, :, c] * mask_float
+        # Cria textura parcialmente opaca com base na máscara
+        texture_with_opacity = cv2.addWeighted(texture, opacity, img, 1 - opacity, 0)
+        result = img.copy()
+        for c in range(3):  # aplica textura nas áreas da máscara
+            result[:, :, c] = np.where(mask == 255, texture_with_opacity[:, :, c], img[:, :, c])
 
         result_filename = f'result_{upload_id}.png'
         result_path = os.path.join(app.config['RESULT_FOLDER'], result_filename)
-        cv2.imwrite(result_path, img)
+        cv2.imwrite(result_path, result)
 
         emit('texture_applied', {
             'status': 'success',
@@ -157,3 +208,4 @@ if __name__ == '__main__':
     os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
     os.makedirs(app.config['TEXTURE_FOLDER'], exist_ok=True)
     socketio.run(app, debug=True)
+

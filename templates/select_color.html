@@ -2,49 +2,291 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <title>Selecionar Área</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selecionar Área - Pintor de Carros</title>
+    <link rel="stylesheet" href="../static/css/style.css">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- <style>
+      :root {
+        --primary-color: #4361ee;
+        --primary-hover: #3a56d4;
+        --secondary-color: #f8f9fa;
+        --text-color: #2b2d42;
+        --light-gray: #e9ecef;
+        --dark-gray: #6c757d;
+        --border-radius: 12px;
+        --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+      }
+      
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      
+      body {
+        font-family: 'Poppins', sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        background-color: var(--secondary-color);
+        padding: 40px 20px;
+      }
+      
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+      }
+      
+      h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+        text-align: center;
+      }
+      
+      .image-editor {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 30px 0;
+      }
+      
       #image-container {
         position: relative;
         display: inline-block;
-        margin: 20px 0;
+        margin-bottom: 30px;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
+      
       #car-image {
         max-width: 100%;
         display: block;
+        border-radius: var(--border-radius);
       }
-      #selection-canvas {
+      
+      #selection-canvas, #mask-overlay, #cursor-overlay {
         position: absolute;
         top: 0;
         left: 0;
-        cursor: crosshair;
+        pointer-events: none;
+        border-radius: var(--border-radius);
+      }
+      
+      #selection-canvas {
         pointer-events: auto;
+        cursor: crosshair;
       }
+      
       .control-panel {
-        margin: 20px 0;
-        padding: 15px;
-        background: #f5f5f5;
+        margin: 30px 0;
+        padding: 25px;
+        background: var(--secondary-color);
+        border-radius: var(--border-radius);
+        width: 100%;
+        max-width: 800px;
       }
+      
       .control-group {
-        margin: 10px 0;
+        margin: 20px 0;
       }
-    </style>
+      
+      .control-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-color);
+      }
+      
+      input[type="range"] {
+        width: 100%;
+        height: 8px;
+        border-radius: 4px;
+        background: var(--light-gray);
+        outline: none;
+        -webkit-appearance: none;
+      }
+      
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        cursor: pointer;
+        transition: var(--transition);
+      }
+      
+      input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.1);
+      }
+      
+      select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--light-gray);
+        border-radius: var(--border-radius);
+        background-color: white;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+        color: var(--text-color);
+        transition: var(--transition);
+      }
+      
+      select:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+      }
+      
+      button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: var(--transition);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+        width: 100%;
+        margin-top: 10px;
+      }
+      
+      button:hover {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(67, 97, 238, 0.3);
+      }
+      
+      .value-display {
+        color: var(--primary-color);
+        font-weight: 500;
+        margin-left: 5px;
+      }
+      
+      .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--light-gray);
+      }
+      
+      @media (max-width: 768px) {
+        .container {
+          padding: 25px 15px;
+        }
+        
+        h1 {
+          font-size: 1.8rem;
+        }
+        
+        .control-panel {
+          padding: 20px 15px;
+        }
+      }
+    </style> -->
   </head>
   <body>
-    <h1>Selecione a Área para Pintura</h1>
-
-    <div id="image-container">
-      <img id="car-image" src="{{ processed_url }}" alt="Seu carro" />
-      <canvas id="selection-canvas"></canvas>
-    </div>
-
-    <div class="control-panel">
-      <div class="control-group">
-        <label>Tolerância: <span id="tolerance-value">30</span></label>
-        <input type="range" id="tolerance" min="1" max="100" value="15" />
+    <!-- Barra de ferramentas suspensa -->
+    <div class="toolbar">
+      <div class="toolbar-header" id="toolbar-toggle">
+        <div class="toolbar-title">Ferramentas de Pintura</div>
+        <div>▼</div>
       </div>
-
+    
+      <div class="toolbar-content" id="toolbar-content">
+        <!-- Grupo Modo de Seleção -->
+        <div class="toolbar-group">
+          <div class="toolbar-group-title" id="mode-group-toggle">
+            <span>Modo de Seleção</span>
+            <span>▼</span>
+          </div>
+          <div class="toolbar-group-content active" id="mode-group-content">
+            <select id="mode-select">
+              <option value="select">Selecionar Área</option>
+              <option value="remove">Remover Área</option>
+              <option value="brush">Pincel (Adicionar)</option>
+              <option value="brush-remove">Pincel (Remover)</option>
+            </select>
+          </div>
+        </div>
+    
+        <!-- Grupo Pincel -->
+        <div class="toolbar-group">
+          <div class="toolbar-group-title" id="brush-group-toggle">
+            <span>Configurações do Pincel</span>
+            <span>▼</span>
+          </div>
+          <div class="toolbar-group-content" id="brush-group-content">
+            <div class="control-group">
+              <label>Tamanho do Pincel: <span class="value-display" id="brush-size-value">10</span></label>
+              <input type="range" id="brush-size" min="3" max="50" value="10" />
+            </div>
+    
+            <div class="control-group">
+              <label>Tolerância: <span class="value-display" id="tolerance-value">30</span></label>
+              <input type="range" id="tolerance" min="1" max="100" value="30" />
+            </div>
+          </div>
+        </div>
+    
+        <!-- Grupo Aparência -->
+        <div class="toolbar-group">
+          <div class="toolbar-group-title" id="appearance-group-toggle">
+            <span>Aparência</span>
+            <span>▼</span>
+          </div>
+          <div class="toolbar-group-content" id="appearance-group-content">
+            <div class="control-group">
+              <label>Cor da Seleção:</label>
+              <input type="color" id="highlight-color" value="#ff69b4">
+            </div>
+    
+            <div class="control-group">
+              <label>Opacidade: <span class="value-display" id="opacity-value">0.7</span></label>
+              <input type="range" id="opacity" min="0" max="1" step="0.1" value="0.7" />
+            </div>
+          </div>
+        </div>
+    
+        <!-- Grupo Textura -->
+        <!-- <div class="toolbar-group">
+          <div class="toolbar-group-title" id="texture-group-toggle">
+            <span>Textura</span>
+            <span>▼</span>
+          </div> -->
+          <!-- <div class="toolbar-group-content" id="texture-group-content">
+            
+          </div> -->
+        </div>
+      </div>
+    </div>
+    
+    <div class="container">
+      <h1>Selecione a Área para Pintura</h1>
+    
+      <canvas id="brushCanvas"></canvas>
+    
+      <div class="image-editor">
+        <div id="image-container">
+          <img id="car-image" src="{{ processed_url }}" alt="Seu carro" />
+          <canvas id="mask-overlay"></canvas>
+          <canvas id="cursor-overlay"></canvas>
+          <canvas id="selection-canvas"></canvas>
+        </div>
+      </div>
       <div class="control-group">
         <label>Textura:</label>
         <select id="texture-select">
@@ -54,18 +296,6 @@
         </select>
       </div>
 
-      <div class="control-group">
-        <label>Opacidade: <span id="opacity-value">0.7</span></label>
-        <input
-          type="range"
-          id="opacity"
-          min="0"
-          max="1"
-          step="0.1"
-          value="0.7"
-        />
-      </div>
-
       <button id="apply-btn">Aplicar Textura</button>
     </div>
 
@@ -73,19 +303,136 @@
       const socket = io();
       const img = document.getElementById("car-image");
       const canvas = document.getElementById("selection-canvas");
+      const maskCanvas = document.getElementById("mask-overlay");
+      const cursorCanvas = document.getElementById("cursor-overlay");
       const ctx = canvas.getContext("2d");
+      const maskCtx = maskCanvas.getContext("2d");
+      const cursorCtx = cursorCanvas.getContext("2d");
       let clickPoints = [];
+      
 
-      function setupCanvas() {
-        canvas.width = img.clientWidth;
-        canvas.height = img.clientHeight;
-        canvas.style.width = img.clientWidth + "px";
-        canvas.style.height = img.clientHeight + "px";
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawMarkers();
+      // Toggle da barra de ferramentas
+      document.getElementById('toolbar-toggle').addEventListener('click', function() {
+        const content = document.getElementById('toolbar-content');
+        content.classList.toggle('active');
+      });
+
+      // Toggles dos grupos de ferramentas
+      document.querySelectorAll('.toolbar-group-title').forEach(title => {
+        title.addEventListener('click', function() {
+          const groupId = this.id.replace('-toggle', '-content');
+          document.getElementById(groupId).classList.toggle('active');
+        });
+      });
+
+      function hexToRgb(hex) {
+        hex = hex.replace(/^#/, "");
+        if (hex.length === 3) {
+          hex = hex.split("").map(c => c + c).join("");
+        }
+        const num = parseInt(hex, 16);
+        return {
+          r: (num >> 16) & 255,
+          g: (num >> 8) & 255,
+          b: num & 255
+        };
       }
 
+    
+      function resizeCanvas() {
+        const width = img.clientWidth;
+        const height = img.clientHeight;
+        [canvas, maskCanvas, cursorCanvas].forEach(c => {
+          c.width = width;
+          c.height = height;
+          c.style.width = width + "px";
+          c.style.height = height + "px";
+        });
+        drawMarkers();
+      }
+    
+      img.onload = () => resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+    
+      document.getElementById("tolerance").addEventListener("input", e => {
+        document.getElementById("tolerance-value").textContent = e.target.value;
+      });
+    
+      document.getElementById("brush-size").addEventListener("input", e => {
+        document.getElementById("brush-size-value").textContent = e.target.value;
+      });
+    
+      document.getElementById("opacity").addEventListener("input", e => {
+        document.getElementById("opacity-value").textContent = e.target.value;
+      });
+    
+      canvas.addEventListener("click", e => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = img.naturalWidth / img.clientWidth;
+        const scaleY = img.naturalHeight / img.clientHeight;
+        const x = Math.floor((e.clientX - rect.left) * scaleX);
+        const y = Math.floor((e.clientY - rect.top) * scaleY);
+        const mode = document.getElementById("mode-select").value;
+    
+        if (mode === "select" || mode === "remove") {
+          clickPoints = [[x, y]];
+          socket.emit("select_area", {
+            upload_id: "{{ upload_id }}",
+            points: clickPoints,
+            tolerance: parseInt(document.getElementById("tolerance").value),
+            mode: mode,
+          });
+        }
+      });
+    
+      let isDrawing = false;
+      let drawnPoints = [];
+    
+      canvas.addEventListener("mousedown", e => {
+        const mode = document.getElementById("mode-select").value;
+        if (mode.startsWith("brush")) {
+          isDrawing = true;
+          drawnPoints = [];
+        }
+      });
+    
+      canvas.addEventListener("mouseup", () => {
+        if (isDrawing) {
+          const mode = document.getElementById("mode-select").value;
+          socket.emit("brush_area", {
+            upload_id: "{{ upload_id }}",
+            points: drawnPoints,
+            radius: parseInt(document.getElementById("brush-size").value),
+            mode: mode === "brush-remove" ? "remove" : "brush",
+          });
+        }
+        isDrawing = false;
+      });
+    
+      canvas.addEventListener("mousemove", e => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = img.naturalWidth / img.clientWidth;
+        const scaleY = img.naturalHeight / img.clientHeight;
+        const x = Math.floor((e.clientX - rect.left) * scaleX);
+        const y = Math.floor((e.clientY - rect.top) * scaleY);
+    
+        cursorCtx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
+        const brushRadius = parseInt(document.getElementById("brush-size").value);
+        const canvasX = (x / img.naturalWidth) * cursorCanvas.width;
+        const canvasY = (y / img.naturalHeight) * cursorCanvas.height;
+        cursorCtx.beginPath();
+        cursorCtx.arc(canvasX, canvasY, (brushRadius / img.naturalWidth) * cursorCanvas.width, 0, 2 * Math.PI);
+        cursorCtx.strokeStyle = "red";
+        cursorCtx.lineWidth = 1;
+        cursorCtx.stroke();
+    
+        if (isDrawing) {
+          drawnPoints.push([x, y]);
+        }
+      });
+    
       function drawMarkers() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let [x, y] of clickPoints) {
           const canvasX = (x / img.naturalWidth) * canvas.width;
           const canvasY = (y / img.naturalHeight) * canvas.height;
@@ -95,55 +442,46 @@
           ctx.fill();
         }
       }
-
-      img.onload = () => {
-        setupCanvas();
-      };
-
-      window.addEventListener("resize", setupCanvas);
-
-      document.getElementById("tolerance").addEventListener("input", (e) => {
-        document.getElementById("tolerance-value").textContent = e.target.value;
-      });
-
-      document.getElementById("opacity").addEventListener("input", (e) => {
-        document.getElementById("opacity-value").textContent = e.target.value;
-      });
-
-      canvas.addEventListener("click", (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = img.naturalWidth / img.clientWidth;
-        const scaleY = img.naturalHeight / img.clientHeight;
-        const x = Math.floor((e.clientX - rect.left) * scaleX);
-        const y = Math.floor((e.clientY - rect.top) * scaleY);
-
-        clickPoints.push([x, y]);
-
-        socket.emit("select_area", {
-          upload_id: "{{ upload_id }}",
-          points: clickPoints,
-          tolerance: parseInt(document.getElementById("tolerance").value),
-        });
-
-        drawMarkers();
-      });
-
-      socket.on("selection_done", (data) => {
+    
+      socket.on("selection_done", data => {
         const maskImg = new Image();
+        maskImg.crossOrigin = "anonymous";
         maskImg.src = data.mask_url + "?t=" + new Date().getTime();
+    
         maskImg.onload = () => {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.globalAlpha = 0.5;
-          ctx.drawImage(maskImg, 0, 0, canvas.width, canvas.height);
-          ctx.globalAlpha = 1.0;
-          drawMarkers();
+          // Desenhar a máscara em um canvas auxiliar
+          const tempCanvas = document.createElement("canvas");
+          tempCanvas.width = maskCanvas.width;
+          tempCanvas.height = maskCanvas.height;
+          const tempCtx = tempCanvas.getContext("2d");
+          tempCtx.drawImage(maskImg, 0, 0, tempCanvas.width, tempCanvas.height);
+    
+          const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+          const dataArr = imageData.data;
+    
+          // Pintar de rosa as áreas onde R = 255 (máscara branca)
+          for (let i = 0; i < dataArr.length; i += 4) {
+            const r = dataArr[i];
+            if (r === 255) {
+              const hexColor = document.getElementById("highlight-color").value;
+              const rgb = hexToRgb(hexColor);
+              dataArr[i] = rgb.r;
+              dataArr[i + 1] = rgb.g;
+              dataArr[i + 2] = rgb.b;
+
+              dataArr[i + 3] = 120; // Alpha (0–255) -> 120 = ~0.5 opacidade
+            } else {
+              dataArr[i + 3] = 0; // Transparente se não for área branca
+            }
+          }
+    
+          // Aplicar no canvas principal
+          const newImageData = new ImageData(dataArr, tempCanvas.width, tempCanvas.height);
+          maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+          maskCtx.putImageData(newImageData, 0, 0);
         };
       });
-
-      socket.on("selection_error", (data) => {
-        alert("Erro na seleção: " + data.error);
-      });
-
+    
       document.getElementById("apply-btn").addEventListener("click", () => {
         socket.emit("apply_texture", {
           upload_id: "{{ upload_id }}",
@@ -151,16 +489,20 @@
           opacity: parseFloat(document.getElementById("opacity").value),
         });
       });
-
-      socket.on("texture_applied", (data) => {
-        window.location.href = `/result?image=${encodeURIComponent(
-          data.result_url
-        )}`;
+    
+      socket.on("texture_applied", data => {
+        window.location.href = `/result?image=${encodeURIComponent(data.result_url)}`;
       });
-
-      socket.on("application_error", (data) => {
+    
+      socket.on("selection_error", data => {
+        alert("Erro na seleção: " + data.error);
+      });
+    
+      socket.on("application_error", data => {
         alert("Erro ao aplicar textura: " + data.error);
       });
     </script>
+    
+    
   </body>
 </html>

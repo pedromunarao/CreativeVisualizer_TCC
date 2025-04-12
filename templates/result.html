@@ -1,46 +1,247 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
   <head>
-    <title>Resultado</title>
-    <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado - Pintor de Carros</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- <style>
+      :root {
+        --primary-color: #4361ee;
+        --primary-hover: #3a56d4;
+        --secondary-color: #f8f9fa;
+        --text-color: #2b2d42;
+        --light-gray: #e9ecef;
+        --border-radius: 12px;
+        --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+      }
+      
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      
       body {
-        font-family: Arial, sans-serif;
+        font-family: 'Poppins', sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        background-color: var(--secondary-color);
+        padding: 40px 20px;
+      }
+      
+      .container {
         max-width: 800px;
         margin: 0 auto;
-        padding: 20px;
+        background: white;
+        padding: 40px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        text-align: center;
       }
+      
+      h1 {
+        font-size: 2.2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+      }
+      
+      .result-description {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      
       #result-image {
         max-width: 100%;
-        border: 2px solid #333;
-        margin: 20px 0;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        margin: 30px 0;
+        border: 1px solid var(--light-gray);
+        transition: var(--transition);
       }
+      
+      #result-image:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      }
+      
       .actions {
-        margin: 20px 0;
+        margin: 40px 0 20px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
       }
-      button {
-        background: #4caf50;
+      
+      .btn {
+        background: var(--primary-color);
         color: white;
         border: none;
-        padding: 10px 20px;
+        padding: 14px 28px;
+        border-radius: var(--border-radius);
         cursor: pointer;
-        margin-right: 10px;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: var(--transition);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
       }
-    </style>
+      
+      .btn:hover {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(67, 97, 238, 0.3);
+      }
+      
+      .btn-outline {
+        background: white;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        box-shadow: none;
+      }
+      
+      .btn-outline:hover {
+        background: rgba(67, 97, 238, 0.05);
+      }
+      
+      .btn i {
+        margin-right: 8px;
+        font-size: 1.1rem;
+      }
+      
+      .share-section {
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid var(--light-gray);
+      }
+      
+      .share-title {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+        color: #6c757d;
+      }
+      
+      .share-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+      
+      .share-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--light-gray);
+        color: var(--text-color);
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+      }
+      
+      .share-btn:hover {
+        transform: translateY(-2px);
+        background: #e0e0e0;
+      }
+      
+      @media (max-width: 768px) {
+        .container {
+          padding: 30px 20px;
+        }
+        
+        h1 {
+          font-size: 1.8rem;
+        }
+        
+        .actions {
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .btn {
+          width: 100%;
+        }
+      }
+    </style> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   </head>
   <body>
-    <h1>Seu Carro Personalizado</h1>
-
-    <img
-      id="result-image"
-      src="{{ result_image }}"
-      alt="Resultado da pintura"
-    />
-
-    <div class="actions">
-      <button onclick="window.location.href='/'">Voltar ao Início</button>
-      <button onclick="window.location.href='{{ result_image }}'" download>
-        Baixar Imagem
-      </button>
+    <div class="container">
+      <h1>Seu Carro Personalizado</h1>
+      <p class="result-description">Confira o resultado da sua personalização. Você pode baixar a imagem ou fazer uma nova modificação.</p>
+      
+      <img
+        id="result-image"
+        src="{{ result_image }}"
+        alt="Resultado da pintura do seu carro"
+      />
+      
+      <div class="actions">
+        <button class="btn" onclick="window.location.href='/'">
+          <i class="fas fa-home"></i> Voltar ao Início
+        </button>
+        <a href="{{ result_image }}" download class="btn btn-outline">
+          <i class="fas fa-download"></i> Baixar Imagem
+        </a>
+      </div>
+      
+      <div class="share-section">
+        <div class="share-title">Compartilhe seu design:</div>
+        <div class="share-buttons">
+          <button class="share-btn" onclick="shareOnSocial('facebook')">
+            <i class="fab fa-facebook-f"></i>
+          </button>
+          <button class="share-btn" onclick="shareOnSocial('twitter')">
+            <i class="fab fa-twitter"></i>
+          </button>
+          <button class="share-btn" onclick="shareOnSocial('instagram')">
+            <i class="fab fa-instagram"></i>
+          </button>
+          <button class="share-btn" onclick="shareOnSocial('whatsapp')">
+            <i class="fab fa-whatsapp"></i>
+          </button>
+        </div>
+      </div>
     </div>
+
+    <script>
+      function shareOnSocial(platform) {
+        const imageUrl = encodeURIComponent("{{ result_image }}");
+        const text = encodeURIComponent("Confira meu carro personalizado com o Pintor de Carros!");
+        let url = '';
+        
+        switch(platform) {
+          case 'facebook':
+            url = `https://www.facebook.com/sharer/sharer.php?u=${imageUrl}`;
+            break;
+          case 'twitter':
+            url = `https://twitter.com/intent/tweet?text=${text}&url=${imageUrl}`;
+            break;
+          case 'whatsapp':
+            url = `https://wa.me/?text=${text}%20${imageUrl}`;
+            break;
+          case 'instagram':
+            alert('Para compartilhar no Instagram, baixe a imagem primeiro e compartilhe diretamente pelo app.');
+            return;
+        }
+        
+        window.open(url, '_blank', 'width=600,height=400');
+      }
+      
+      // Adiciona data atual como parâmetro para evitar cache
+      document.getElementById('result-image').src = "{{ result_image }}" + "?t=" + new Date().getTime();
+    </script>
   </body>
 </html>
