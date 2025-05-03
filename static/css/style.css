@@ -36,6 +36,7 @@
     padding: 40px;
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
+    position: relative; /* Necessário para que a imagem seja posicionada relativa à div */
   }
   
   /* Tipografia */
@@ -463,6 +464,20 @@
   }
 }
 
+.logo {
+  display: block;
+  margin: 0 auto 1rem;
+  max-width: 100%;
+  height: auto;
+}
+
+.logo-corner {
+  position: relative;
+
+  top: 0px;
+  left:40%;
+  width: 20%; /* Ajuste o tamanho conforme necessário */
+}
 
 
- 
+

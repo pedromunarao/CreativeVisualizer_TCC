@@ -13,7 +13,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['TEXTURE_FOLDER'] = 'static/textures'
 app.config['RESULT_FOLDER'] = 'static/results'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
-app.config['SECRET_KEY'] = 'sua_chave_secreta_aqui'
+app.config['SECRET_KEY'] = ''
 
 socketio = SocketIO(app, cors_allowed_origins="*")
 

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultado - Pintor de Carros</title>
+    <title>Result - Creative Visualizer</title>
     <link rel="stylesheet" href="../static/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <!-- <style>
@@ -179,8 +179,9 @@
   </head>
   <body>
     <div class="container">
-      <h1>Seu Carro Personalizado</h1>
-      <p class="result-description">Confira o resultado da sua personalização. Você pode baixar a imagem ou fazer uma nova modificação.</p>
+      <h1>Look the Result!</h1>
+      <p class="result-description">
+        Check the result of your customization. You can download the image or make a new modification.</p>
       
       <img
         id="result-image"
@@ -190,15 +191,15 @@
       
       <div class="actions">
         <button class="btn" onclick="window.location.href='/'">
-          <i class="fas fa-home"></i> Voltar ao Início
+          <i class="fas fa-home"></i> Back to Home
         </button>
         <a href="{{ result_image }}" download class="btn btn-outline">
-          <i class="fas fa-download"></i> Baixar Imagem
+          <i class="fas fa-download"></i> Download Image
         </a>
       </div>
       
       <div class="share-section">
-        <div class="share-title">Compartilhe seu design:</div>
+        <div class="share-title">Share your Design:</div>
         <div class="share-buttons">
           <button class="share-btn" onclick="shareOnSocial('facebook')">
             <i class="fab fa-facebook-f"></i>

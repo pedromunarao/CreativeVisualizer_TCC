@@ -3,206 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selecionar Área - Pintor de Carros</title>
+    <title>Select Area - Creative Visualizer</title>
     <link rel="stylesheet" href="../static/css/style.css">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- <style>
-      :root {
-        --primary-color: #4361ee;
-        --primary-hover: #3a56d4;
-        --secondary-color: #f8f9fa;
-        --text-color: #2b2d42;
-        --light-gray: #e9ecef;
-        --dark-gray: #6c757d;
-        --border-radius: 12px;
-        --box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        --transition: all 0.3s ease;
-      }
-      
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      
-      body {
-        font-family: 'Poppins', sans-serif;
-        line-height: 1.6;
-        color: var(--text-color);
-        background-color: var(--secondary-color);
-        padding: 40px 20px;
-      }
-      
-      .container {
-        max-width: 1000px;
-        margin: 0 auto;
-        background: white;
-        padding: 40px;
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
-      }
-      
-      h1 {
-        font-size: 2rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        color: var(--primary-color);
-        text-align: center;
-      }
-      
-      .image-editor {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 30px 0;
-      }
-      
-      #image-container {
-        position: relative;
-        display: inline-block;
-        margin-bottom: 30px;
-        border-radius: var(--border-radius);
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      }
-      
-      #car-image {
-        max-width: 100%;
-        display: block;
-        border-radius: var(--border-radius);
-      }
-      
-      #selection-canvas, #mask-overlay, #cursor-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        pointer-events: none;
-        border-radius: var(--border-radius);
-      }
-      
-      #selection-canvas {
-        pointer-events: auto;
-        cursor: crosshair;
-      }
-      
-      .control-panel {
-        margin: 30px 0;
-        padding: 25px;
-        background: var(--secondary-color);
-        border-radius: var(--border-radius);
-        width: 100%;
-        max-width: 800px;
-      }
-      
-      .control-group {
-        margin: 20px 0;
-      }
-      
-      .control-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 500;
-        color: var(--text-color);
-      }
-      
-      input[type="range"] {
-        width: 100%;
-        height: 8px;
-        border-radius: 4px;
-        background: var(--light-gray);
-        outline: none;
-        -webkit-appearance: none;
-      }
-      
-      input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: var(--primary-color);
-        cursor: pointer;
-        transition: var(--transition);
-      }
-      
-      input[type="range"]::-webkit-slider-thumb:hover {
-        transform: scale(1.1);
-      }
-      
-      select {
-        width: 100%;
-        padding: 12px 15px;
-        border: 1px solid var(--light-gray);
-        border-radius: var(--border-radius);
-        background-color: white;
-        font-family: 'Poppins', sans-serif;
-        font-size: 1rem;
-        color: var(--text-color);
-        transition: var(--transition);
-      }
-      
-      select:focus {
-        border-color: var(--primary-color);
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
-      }
-      
-      button {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 14px 28px;
-        border-radius: var(--border-radius);
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: 500;
-        transition: var(--transition);
-        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
-        width: 100%;
-        margin-top: 10px;
-      }
-      
-      button:hover {
-        background: var(--primary-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(67, 97, 238, 0.3);
-      }
-      
-      .value-display {
-        color: var(--primary-color);
-        font-weight: 500;
-        margin-left: 5px;
-      }
-      
-      .section-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: var(--primary-color);
-        margin-bottom: 15px;
-        padding-bottom: 8px;
-        border-bottom: 2px solid var(--light-gray);
-      }
-      
-      @media (max-width: 768px) {
-        .container {
-          padding: 25px 15px;
-        }
-        
-        h1 {
-          font-size: 1.8rem;
-        }
-        
-        .control-panel {
-          padding: 20px 15px;
-        }
-      }
-    </style> -->
   </head>
   <body>
     <!-- Barra de ferramentas suspensa -->
     <div class="toolbar">
       <div class="toolbar-header" id="toolbar-toggle">
-        <div class="toolbar-title">Ferramentas de Pintura</div>
+        <div class="toolbar-title">Painting Tools</div>
         <div>▼</div>
       </div>
     
@@ -210,15 +20,15 @@
         <!-- Grupo Modo de Seleção -->
         <div class="toolbar-group">
           <div class="toolbar-group-title" id="mode-group-toggle">
-            <span>Modo de Seleção</span>
+            <span>Selection Mode</span>
             <span>▼</span>
           </div>
           <div class="toolbar-group-content active" id="mode-group-content">
             <select id="mode-select">
-              <option value="select">Selecionar Área</option>
-              <option value="remove">Remover Área</option>
-              <option value="brush">Pincel (Adicionar)</option>
-              <option value="brush-remove">Pincel (Remover)</option>
+              <option value="select">Select Area</option>
+              <option value="remove">Remove Area</option>
+              <option value="brush">Brush (Add)</option>
+              <option value="brush-remove">Brush (Remove)</option>
             </select>
           </div>
         </div>
@@ -226,17 +36,17 @@
         <!-- Grupo Pincel -->
         <div class="toolbar-group">
           <div class="toolbar-group-title" id="brush-group-toggle">
-            <span>Configurações do Pincel</span>
+            <span>Brush Tools</span>
             <span>▼</span>
           </div>
           <div class="toolbar-group-content" id="brush-group-content">
             <div class="control-group">
-              <label>Tamanho do Pincel: <span class="value-display" id="brush-size-value">10</span></label>
+              <label>Brush size: <span class="value-display" id="brush-size-value">10</span></label>
               <input type="range" id="brush-size" min="3" max="50" value="10" />
             </div>
     
             <div class="control-group">
-              <label>Tolerância: <span class="value-display" id="tolerance-value">30</span></label>
+              <label>Tolerance: <span class="value-display" id="tolerance-value">30</span></label>
               <input type="range" id="tolerance" min="1" max="100" value="30" />
             </div>
           </div>
@@ -245,17 +55,17 @@
         <!-- Grupo Aparência -->
         <div class="toolbar-group">
           <div class="toolbar-group-title" id="appearance-group-toggle">
-            <span>Aparência</span>
+            <span>Appearance</span>
             <span>▼</span>
           </div>
           <div class="toolbar-group-content" id="appearance-group-content">
             <div class="control-group">
-              <label>Cor da Seleção:</label>
+              <label>Selection Color:</label>
               <input type="color" id="highlight-color" value="#ff69b4">
             </div>
     
             <div class="control-group">
-              <label>Opacidade: <span class="value-display" id="opacity-value">0.7</span></label>
+              <label>Opacity: <span class="value-display" id="opacity-value">0.7</span></label>
               <input type="range" id="opacity" min="0" max="1" step="0.1" value="0.7" />
             </div>
           </div>
@@ -275,7 +85,8 @@
     </div>
     
     <div class="container">
-      <h1>Selecione a Área para Pintura</h1>
+      <h1>Select the Area for Transformation
+      </h1>
     
       <canvas id="brushCanvas"></canvas>
     
@@ -288,7 +99,7 @@
         </div>
       </div>
       <div class="control-group">
-        <label>Textura:</label>
+        <label>Textures:</label>
         <select id="texture-select">
           {% for texture in textures %}
           <option value="{{ texture }}">{{ texture }}</option>
@@ -296,7 +107,7 @@
         </select>
       </div>
 
-      <button id="apply-btn">Aplicar Textura</button>
+      <button id="apply-btn">Apply Texture</button>
     </div>
 
     <script>
@@ -430,7 +241,7 @@
           drawnPoints.push([x, y]);
         }
       });
-    
+  
       function drawMarkers() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let [x, y] of clickPoints) {

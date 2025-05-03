@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pintor de Carros - Visualize seu carro em novas cores</title>
+    <title>Creative Visualizer</title>
     <link rel="stylesheet" href="../static/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <!-- <style>
@@ -149,20 +149,20 @@
   </head>
   <body>
     <div class="container">
-      <h1>Creative Visualizer</h1>
-      <p class="subtitle">Faça upload de uma imagem do seu carro para visualizá-lo em nossas texturas</p>
+      <img src="../static/textures/logo.png" alt="Creative Visualizer Logo" class="logo-corner">
+      <p class="subtitle">Upload your car for visualize our textures!</p>
 
       <form action="/upload" method="post" enctype="multipart/form-data" class="upload-box" id="uploadForm">
         <input type="file" name="file" id="fileInput" accept="image/*" required class="file-input">
-        <label for="fileInput" class="file-label">Selecionar Imagem</label>
-        <div class="file-name" id="fileName">Nenhum arquivo selecionado</div>
+        <label for="fileInput" class="file-label">Select Image</label>
+        <div class="file-name" id="fileName">No file selected</div>
 
         <div class="checkbox-container">
           <input type="checkbox" name="remove_bg" id="removeBg" checked>
-          <label for="removeBg">Remover fundo da imagem automaticamente</label>
+          <label for="removeBg">Remove background</label>
         </div>
 
-        <button type="submit">Enviar Imagem</button>
+        <button type="submit">Send Image</button>
       </form>
     </div>
 
@@ -197,3 +197,4 @@
     </script>
   </body>
 </html>
+``` 
